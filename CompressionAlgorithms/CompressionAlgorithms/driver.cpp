@@ -27,6 +27,6 @@ int main(int argc, char* argv[]) {
 		return(EXIT_FAILURE);
 	}
 
-	cout << "Success" << endl;
+	cout << "Successfully Compressed" << endl;
 	return(EXIT_SUCCESS);
 }
