@@ -22,7 +22,26 @@ SlidingWindow::SlidingWindow() {
 SlidingWindow::~SlidingWindow() {
 }
 
-int findLongestMatch(queue<int> lookAheadBuffer, queue<int> dictionary, int index, int dictionaryIndex) {
+Encoded *setEncoded(int index, int dictionaryIndex, int length, Encoded *code) {
+
+	if (code == NULL) {
+
+		code->length = length;
+		code->offset = dictionaryIndex - index;
+	}
+	else {
+
+		if (code->length < length) {
+
+			code->length = length;
+			code->offset = dictionaryIndex - index;
+		}
+	}
+
+	return code;
+}
+
+Encoded* findLongestMatch(queue<int> lookAheadBuffer, queue<int> dictionary, int index, int dictionaryIndex) {
 
 	int character = lookAheadBuffer.pop;
 	Encoded *code;
@@ -33,6 +52,8 @@ int findLongestMatch(queue<int> lookAheadBuffer, queue<int> dictionary, int inde
 
 		if (dicChar == character) {
 
+			queue<int> dictionaryCopy = dictionary;
+
 			index++;
 			dictionaryIndex++;
 
@@ -41,11 +62,12 @@ int findLongestMatch(queue<int> lookAheadBuffer, queue<int> dictionary, int inde
 
 				try {
 
-					int dicChar = dictionary.pop;
+					int dicChar = dictionaryCopy.pop;
 					int character = lookAheadBuffer.pop;
 				}
 				catch (int error) {
 
+					code = setEncoded(index, dictionaryIndex, length, code);
 					break;
 				}
 
@@ -65,25 +87,19 @@ int findLongestMatch(queue<int> lookAheadBuffer, queue<int> dictionary, int inde
 					}
 					else {
 
-						if (code == NULL) {
-
-							code->length = length;
-							code->offset = dictionaryIndex - index;
-						}
-						else {
-
-							if (code->length < length) {
-
-								code->length = length;
-								code->offset = dictionaryIndex - index;
-							}
-						}
+						code = setEncoded(index, dictionaryIndex, length, code);
 
 						index -= i;
 						dictionaryIndex -= (i - 1);
+
+						break;
 					}
 				}
 			}
+		}
+		else {
+
+			index++;
 		}
 	}
 }
@@ -112,17 +128,25 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 	for (int c = fgetc(infile); c != EOF; c = fgetc(infile)) {
 
 		lookAheadBuffer.push(c);
+		Encoded* longestMatch;
 
-		if (lookAheadBuffer.size() == 4) {
+		if (lookAheadBuffer.size() == BUFFERSIZE) {
 
 			if (dictionary.empty || dictionary.size() == 1|| dictionary.size() == 2) {
 
-				output.push(c);
+				output.push(lookAheadBuffer.pop);
 			}
 			else {
 
-				int something = findLongestMatch(lookAheadBuffer, dictionary, index, dictionaryIndex);
+				longestMatch = findLongestMatch(lookAheadBuffer, dictionary, index, dictionaryIndex);
 			}
+		}
+
+		lookAheadBuffer.pop;
+
+		if (longestMatch == NULL) {
+
+			output.push(lookAheadBuffer.pop);
 		}
 	}
 }
