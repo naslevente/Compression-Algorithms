@@ -1,4 +1,5 @@
 #include "HuffmanCompression.h"
+#include "SlidingWindow.h"
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +20,8 @@ int main(int argc, char* argv[]) {
 	FILE* infile = fopen(argv[1], "r + b");
 	FILE* outfile = fopen(argv[2], "w + b");
 
-	int val = HuffmanCompression::HuffEncode(infile, outfile);
+	//int val = HuffmanCompression::HuffEncode(infile, outfile);
+	int val = SlidingWindow::SlidingEncode(infile, outfile);
 
 	if (val == 1) {
 

@@ -8,12 +8,12 @@
 using namespace std;
 
 #define MAX_ITEMS 256
-#define BUFFERSIZE 6
+#define BUFFERSIZE 4
 
-typedef struct Encoded {
+struct Encoded {
 
-	int offset;
-	int length;
+	int offset = NULL;
+	int length = NULL;
 };
 
 SlidingWindow::SlidingWindow() {
@@ -43,65 +43,79 @@ Encoded *setEncoded(int index, int dictionaryIndex, int length, Encoded *code) {
 
 Encoded* findLongestMatch(queue<int> lookAheadBuffer, queue<int> dictionary, int index, int dictionaryIndex) {
 
-	int character = lookAheadBuffer.pop;
-	Encoded *code;
+	int character = lookAheadBuffer.front();
+	lookAheadBuffer.pop();
+	Encoded* code = new Encoded;
 
-	for (int i = 0; i < dictionary.size(); i++) {
+	int size = dictionary.size();
 
-		int dicChar = dictionary.pop;
+	for (int i = 0; i < size; i++) {
+
+		int dicChar = dictionary.front();
+		dictionary.pop();
 
 		if (dicChar == character) {
 
 			queue<int> dictionaryCopy = dictionary;
+			queue<int> lookAheadCopy = lookAheadBuffer;
+
+			int characterCopy = character;
 
 			index++;
 			dictionaryIndex++;
 
 			int length = 1;
-			for (int i = 0; i < BUFFERSIZE - 1; i++) {
+			for (int i = 0; i < BUFFERSIZE; i++) {
 
-				try {
-
-					int dicChar = dictionaryCopy.pop;
-					int character = lookAheadBuffer.pop;
-				}
-				catch (int error) {
+				if (lookAheadCopy.empty() || dictionaryCopy.empty()) {
 
 					code = setEncoded(index, dictionaryIndex, length, code);
 					break;
 				}
-
-				if (dicChar == character) {
-
-					length++;
-					index++;
-					dictionaryIndex++;
-				}
 				else {
 
-					if (length == 1 || length == 2) {
+					dicChar = dictionaryCopy.front();
+					dictionaryCopy.pop();
 
-						index -= i;
-						dictionaryIndex -= (i - 1);
-						break;
+					character = lookAheadCopy.front();
+					lookAheadCopy.pop();
+
+					if (dicChar == character) {
+
+						length++;
+						index++;
+						dictionaryIndex++;
 					}
 					else {
 
-						code = setEncoded(index, dictionaryIndex, length, code);
+						if (length == 1 || length == 2) {
 
-						index -= i;
-						dictionaryIndex -= (i - 1);
+							index -= i;
+							dictionaryIndex -= (i - 1);
+							break;
+						}
+						else {
 
-						break;
+							code = setEncoded(index, dictionaryIndex, length, code);
+
+							index -= i;
+							dictionaryIndex -= (i - 1);
+
+							break;
+						}
 					}
 				}
 			}
+
+			character = characterCopy;
 		}
 		else {
 
 			index++;
 		}
 	}
+
+	return code;
 }
 
 int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
@@ -118,7 +132,15 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 		return(EXIT_FAILURE);
 	}
 
-	queue<int> output;
+	Encoded* code = findLongestMatch(something2, something, 5, 0);
+
+	cout << code->length << endl;
+
+	return 1;
+
+	/*
+	//queue<int> output;
+	string output;
 	queue<int> lookAheadBuffer;
 	queue<int> dictionary;
 
@@ -134,7 +156,8 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 
 			if (dictionary.empty || dictionary.size() == 1|| dictionary.size() == 2) {
 
-				output.push(lookAheadBuffer.pop);
+				output.append(to_string(lookAheadBuffer.pop));
+				dictionary.push(lookAheadBuffer.pop);
 			}
 			else {
 
@@ -142,12 +165,16 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 			}
 		}
 
-		lookAheadBuffer.pop;
-
 		if (longestMatch == NULL) {
 
-			output.push(lookAheadBuffer.pop);
+			output.append(to_string(lookAheadBuffer.pop));
+		}
+		else {
+
+			output.append(to_string(lookAheadBuffer.pop));
+			output.append(to_string(lookAheadBuffer.pop));
 		}
 	}
+	*/
 }
 
