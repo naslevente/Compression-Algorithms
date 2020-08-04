@@ -132,13 +132,6 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 		return(EXIT_FAILURE);
 	}
 
-	Encoded* code = findLongestMatch(something2, something, 5, 0);
-
-	cout << code->length << endl;
-
-	return 1;
-
-	/*
 	//queue<int> output;
 	string output;
 	queue<int> lookAheadBuffer;
@@ -167,14 +160,22 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 
 		if (longestMatch == NULL) {
 
-			output.append(to_string(lookAheadBuffer.pop));
+			output.append(to_string(lookAheadBuffer.front()));
+
+			dictionary.push(lookAheadBuffer.front());
+			lookAheadBuffer.pop();
 		}
 		else {
 
-			output.append(to_string(lookAheadBuffer.pop));
-			output.append(to_string(lookAheadBuffer.pop));
+			output.append(to_string(longestMatch->length));
+			output.append(to_string(longestMatch->offset));
+
+			for (int i = 0; i < longestMatch->length; i++) {
+
+				dictionary.push(lookAheadBuffer.front());
+				lookAheadBuffer.pop();
+			}
 		}
 	}
-	*/
 }
 
