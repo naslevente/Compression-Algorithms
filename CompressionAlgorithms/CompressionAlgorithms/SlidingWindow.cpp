@@ -149,8 +149,9 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 
 			if (dictionary.empty || dictionary.size() == 1|| dictionary.size() == 2) {
 
-				output.append(to_string(lookAheadBuffer.pop));
-				dictionary.push(lookAheadBuffer.pop);
+				output.append(to_string(lookAheadBuffer.front()));
+				dictionary.push(lookAheadBuffer.front());
+				lookAheadBuffer.pop();
 			}
 			else {
 
@@ -158,14 +159,7 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 			}
 		}
 
-		if (longestMatch == NULL) {
-
-			output.append(to_string(lookAheadBuffer.front()));
-
-			dictionary.push(lookAheadBuffer.front());
-			lookAheadBuffer.pop();
-		}
-		else {
+		if(longestMatch != NULL) {
 
 			output.append(to_string(longestMatch->length));
 			output.append(to_string(longestMatch->offset));
