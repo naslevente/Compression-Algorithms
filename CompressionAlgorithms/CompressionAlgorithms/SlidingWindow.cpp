@@ -22,6 +22,43 @@ SlidingWindow::SlidingWindow() {
 SlidingWindow::~SlidingWindow() {
 }
 
+void UpdateQueues(queue<int> &dictionary, queue<int> &lookAheadBuffer, string &output, bool changeOutput) {
+
+	if (changeOutput) {
+
+		output.append(to_string(lookAheadBuffer.front()));
+	}
+
+	dictionary.push(lookAheadBuffer.front());
+
+	if (dictionary.size() >= 101) {
+
+		dictionary.pop();
+	}
+
+	lookAheadBuffer.pop();
+}
+
+void AddCode(queue<int> &dictionary, queue<int> &lookAheadBuffer, string &output, Encoded *longestMatch) {
+
+	if (longestMatch->length != NULL) {
+
+		output.append(to_string(longestMatch->length));
+		output.append(to_string(longestMatch->offset));
+
+		cout << longestMatch->length << " " << lookAheadBuffer.size() << endl;
+
+		for (int i = 0; i < longestMatch->length; i++) {
+
+			UpdateQueues(dictionary, lookAheadBuffer, output, false);
+		}
+	}
+	else {
+
+		UpdateQueues(dictionary, lookAheadBuffer, output, true);
+	}
+}
+
 Encoded *setEncoded(int index, int dictionaryIndex, int length, Encoded *code) {
 
 	if (code == NULL) {
@@ -143,11 +180,12 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 	for (int c = fgetc(infile); c != EOF; c = fgetc(infile)) {
 
 		lookAheadBuffer.push(c);
-		Encoded* longestMatch;
+		cout << c << " " << lookAheadBuffer.size() << endl;
+		Encoded* longestMatch = new Encoded;
 
 		if (lookAheadBuffer.size() == BUFFERSIZE) {
 
-			if (dictionary.empty || dictionary.size() == 1|| dictionary.size() == 2) {
+			if (dictionary.empty() || dictionary.size() == 1|| dictionary.size() == 2) {
 
 				output.append(to_string(lookAheadBuffer.front()));
 				dictionary.push(lookAheadBuffer.front());
@@ -157,18 +195,21 @@ int SlidingWindow::SlidingEncode(FILE* infile, FILE* outfile) {
 
 				longestMatch = findLongestMatch(lookAheadBuffer, dictionary, index, dictionaryIndex);
 			}
+
+			AddCode(dictionary, lookAheadBuffer, output, longestMatch);
 		}
+	}
 
-		if(longestMatch != NULL) {
+	if (lookAheadBuffer.empty()) {
 
-			output.append(to_string(longestMatch->length));
-			output.append(to_string(longestMatch->offset));
+		cout << "Reeached the end of the input file" << endl;
+	}
+	else {
 
-			for (int i = 0; i < longestMatch->length; i++) {
+		while (lookAheadBuffer.size() > 2) {
 
-				dictionary.push(lookAheadBuffer.front());
-				lookAheadBuffer.pop();
-			}
+			Encoded* longestMatch = findLongestMatch(lookAheadBuffer, dictionary, index, dictionaryIndex);
+			AddCode(dictionary, lookAheadBuffer, output, longestMatch);
 		}
 	}
 }
